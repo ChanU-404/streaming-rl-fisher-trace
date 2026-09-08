@@ -10,7 +10,10 @@ venv/
 # experiment outputs
 data_intentional_ac_*/
 results/step3_returns/
+results/checkpoints/
+results/_log_*.txt
 *.pkl
+*.pt
 wandb/
 
 # os
