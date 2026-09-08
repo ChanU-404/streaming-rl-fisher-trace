@@ -46,6 +46,11 @@ def train_to_checkpoint(env_name, seed, gamma=0.99, lamda=0.8, total_steps=1_000
                 elapsed = time.time() - t0
                 print(f"[{env_name} seed={seed}] step={t} episodic_return={ep_ret} elapsed={elapsed:.1f}s")
 
+    opt_pol = agent.optimizer_policy
+    policy_rmsprop_v_hat = [
+        opt_pol.state[p]["rmsprop_v_hat"].clone() for p in agent.policy_net.parameters()
+    ]
+
     checkpoint = {
         "env_name": env_name,
         "seed": seed,
@@ -67,6 +72,21 @@ def train_to_checkpoint(env_name, seed, gamma=0.99, lamda=0.8, total_steps=1_000
         "reward_epsilon": env.env.epsilon,
         "returns_log": returns_log,
         "train_wall_clock_sec": time.time() - t0,
+        # Frozen IntentionalOptimizerPolicy internal state, for a bias measurement
+        # that reproduces the *actual* Algorithm 3 mechanism (RMSProp entrywise
+        # preconditioner rho_t=1/v_hat, sigma-bar, and the delta clip/normalize
+        # EMA), not just the simplified Appendix B illustration.
+        "policy_opt_rmsprop_v_hat": policy_rmsprop_v_hat,
+        "policy_opt_sigma": opt_pol.sigma,
+        "policy_opt_t_step": opt_pol.t_step,
+        "policy_opt_clip_ema_sq": opt_pol.clip_ema_sq,
+        "policy_opt_clip_t": opt_pol.clip_t,
+        "policy_opt_delta_abs_ema": opt_pol.delta_abs_ema,
+        "policy_opt_norm_t": opt_pol.norm_t,
+        "policy_opt_beta_clip": opt_pol.beta_clip,
+        "policy_opt_beta_norm": opt_pol.beta_norm,
+        "policy_opt_clip_mult": opt_pol.clip_mult,
+        "policy_opt_beta2": opt_pol.beta2,
     }
     env.close()
     return checkpoint
