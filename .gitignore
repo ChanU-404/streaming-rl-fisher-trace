@@ -1,0 +1,18 @@
+# baseline is a pristine clone of the upstream repo; not tracked as a submodule here
+baseline/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# experiment outputs
+data_intentional_ac_*/
+results/step3_returns/
+*.pkl
+wandb/
+
+# os
+.DS_Store
+Thumbs.db
